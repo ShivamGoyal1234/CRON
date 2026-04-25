@@ -1,0 +1,32 @@
+services:
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: cron_user
+      POSTGRES_PASSWORD: cron_password
+      POSTGRES_DB: cron_db
+    ports:
+      - "6001:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  app:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      - db
+    ports:
+      - "3001:3000"
+    environment:
+      DATABASE_URL: postgresql://cron_user:cron_password@db:5432/cron_db?schema=public
+      NEXTAUTH_SECRET: change_me
+      NEXTAUTH_URL: http://localhost:3001
+      GOOGLE_CLIENT_ID: ""
+      GOOGLE_CLIENT_SECRET: ""
+    volumes:
+      - .:/app
+      - /app/node_modules
+
+volumes:
+  pgdata:
