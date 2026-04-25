@@ -20,6 +20,72 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## Deploy on Hostinger VPS with Nginx
+
+This app can run on your server `srv1115957.hstgr.cloud` behind Nginx with the domain `cron.shivam-goyal.site`, alongside other apps.
+
+### 1) Point domain DNS
+
+Create an `A` record:
+
+- Host: `cron`
+- Value: your VPS public IP
+- TTL: default
+
+### 2) Prepare env on server
+
+In project root:
+
+```bash
+cp env.production.example .env.production
+```
+
+Update `.env.production` values, especially:
+
+- `POSTGRES_PASSWORD`
+- `NEXTAUTH_SECRET`
+- `NEXTAUTH_URL=https://cron.shivam-goyal.site`
+- `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` (if using Google auth)
+
+### 3) Start containers
+
+```bash
+docker compose -f docker-compose.prod.yml up -d --build
+```
+
+App becomes available on `127.0.0.1:3001`.
+
+### 4) Configure Nginx reverse proxy
+
+Copy provided config:
+
+```bash
+sudo cp deploy/nginx/cron.shivam-goyal.site.conf /etc/nginx/sites-available/cron.shivam-goyal.site
+sudo ln -s /etc/nginx/sites-available/cron.shivam-goyal.site /etc/nginx/sites-enabled/cron.shivam-goyal.site
+sudo nginx -t
+sudo systemctl reload nginx
+```
+
+### 5) Enable HTTPS (Let's Encrypt)
+
+```bash
+sudo certbot --nginx -d cron.shivam-goyal.site
+```
+
+Choose redirect to HTTPS when prompted.
+
+### 6) Open firewall ports
+
+Allow `80` and `443` on server firewall/security group.
+
+### Useful commands
+
+```bash
+docker compose -f docker-compose.prod.yml logs -f app
+docker compose -f docker-compose.prod.yml ps
+docker compose -f docker-compose.prod.yml restart app
+```
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:
