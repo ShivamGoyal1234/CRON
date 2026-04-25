@@ -24,9 +24,6 @@ services:
       NEXTAUTH_URL: http://localhost:3001
       GOOGLE_CLIENT_ID: ""
       GOOGLE_CLIENT_SECRET: ""
-    volumes:
-      - .:/app
-      - /app/node_modules
 
 volumes:
   pgdata:
